@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¿Aceptas?</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            background-color: #000;
+        }
+
+        #meteor-shower {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(to bottom, #020111 10%, #3a3a52 100%);
+        }
+
+        .container {
+            text-align: center;
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+        }
+
+        .pregunta {
+            display: block;
+        }
+
+        .respuesta {
+            display: none;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+
+        .imagen-container {
+            margin: 20px 0;
+        }
+
+        .imagen-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .botones-container {
+            position: relative;
+            margin-top: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            min-height: 200px;
+        }
+
+        button {
+            padding: 15px 40px;
+            font-size: 20px;
+            font-weight: bold;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        #btnSi {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        #btnSi:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        #btnNo {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            position: fixed;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .mensaje-final {
+            font-size: 24px;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .emoji {
+            font-size: 60px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="meteor-shower"></canvas>
+    <div class="container">
+        <div class="pregunta" id="pregunta">
+            <h1>¿Aceptas salir a golpear a parejas felices? 💕</h1>
+
+            <div class="imagen-container">
+                <!-- Puedes cambiar esta URL por la imagen que quieras -->
+                <img src="https://i.imgur.com/YgyxgxKl.png" alt="Imagen romántica">
+            </div>
+
+            <div class="botones-container" id="botonesContainer">
+                <button id="btnSi">Sí</button>
+                <button id="btnNo">No</button>
+            </div>
+        </div>
+
+        <div class="respuesta" id="respuesta">
+            <div class="emoji">🎉😝✨</div>
+            <h1 class="mensaje-final">¡Gracias!<br>Tu solo trae tu fierro también 😎</h1>
+        </div>
+    </div>
+
+    <script>
+        const btnSi = document.getElementById('btnSi');
+        const btnNo = document.getElementById('btnNo');
+        const botonesContainer = document.getElementById('botonesContainer');
+        const pregunta = document.getElementById('pregunta');
+        const respuesta = document.getElementById('respuesta');
+
+        let intentos = 0;
+        const maxIntentos = 30;
+        let tamañoInicial = 20; // Tamaño inicial del botón Sí en px
+
+        // Función para mover el botón No a una posición aleatoria
+        function moverBotonNo() {
+            const windowWidth = window.innerWidth;
+            const windowHeight = window.innerHeight;
+            const btnRect = btnNo.getBoundingClientRect();
+
+            // Generar posiciones más aleatorias en toda la ventana
+            // Evitar los bordes para que no se salga de la pantalla
+            const margen = 50;
+            const maxX = windowWidth - btnRect.width - margen;
+            const maxY = windowHeight - btnRect.height - margen;
+
+            // Posiciones completamente aleatorias
+            const randomX = margen + Math.random() * (maxX - margen);
+            const randomY = margen + Math.random() * (maxY - margen);
+
+            // Usar posición fija en lugar de absoluta para que se mueva por toda la ventana
+            btnNo.style.position = 'fixed';
+            btnNo.style.left = randomX + 'px';
+            btnNo.style.top = randomY + 'px';
+        }
+
+        // Función para aumentar el tamaño del botón Sí
+        function aumentarBotonSi() {
+            intentos++;
+
+            if (intentos <= maxIntentos) {
+                // Incrementar el tamaño del texto y padding de forma exponencial
+                const nuevoTamaño = tamañoInicial + (intentos * 5);
+                const nuevoPadding = 15 + (intentos * 4);
+
+                btnSi.style.fontSize = nuevoTamaño + 'px';
+                btnSi.style.padding = nuevoPadding + 'px ' + (nuevoPadding * 2) + 'px';
+                btnSi.style.transition = 'all 0.3s ease';
+            } else {
+                // Reiniciar después de 30 intentos
+                intentos = 0;
+                btnSi.style.fontSize = tamañoInicial + 'px';
+                btnSi.style.padding = '15px 40px';
+            }
+        }
+
+        // Evento cuando el mouse entra en el botón No
+        btnNo.addEventListener('mouseenter', function () {
+            moverBotonNo();
+            aumentarBotonSi();
+        });
+
+        // Evento para dispositivos táctiles
+        btnNo.addEventListener('touchstart', function (e) {
+            e.preventDefault();
+            moverBotonNo();
+            aumentarBotonSi();
+        });
+
+        // Evento cuando se hace clic en Sí
+        btnSi.addEventListener('click', function () {
+            pregunta.style.display = 'none';
+            respuesta.style.display = 'block';
+        });
+
+        // Inicializar la posición del botón No
+        window.addEventListener('load', function () {
+            moverBotonNo();
+            initMeteorShower();
+        });
+
+        // Meteor Shower Animation
+        function initMeteorShower() {
+            const canvas = document.getElementById('meteor-shower');
+            const ctx = canvas.getContext('2d');
+
+            let width, height;
+            const meteors = [];
+            const stars = [];
+
+            const resize = () => {
+                width = window.innerWidth;
+                height = window.innerHeight;
+                canvas.width = width;
+                canvas.height = height;
+                createStars();
+            };
+
+            const createStars = () => {
+                stars.length = 0;
+                const starCount = Math.floor((width * height) / 3000); // Density of stars
+                for (let i = 0; i < starCount; i++) {
+                    stars.push({
+                        x: Math.random() * width,
+                        y: Math.random() * height,
+                        radius: Math.random() * 1.5,
+                        opacity: Math.random()
+                    });
+                }
+            };
+
+            class Meteor {
+                constructor() {
+                    this.reset();
+                }
+
+                reset() {
+                    this.x = Math.random() * width + 300; // Start off-screen right/top roughly
+                    this.y = Math.random() * -100;
+                    this.len = Math.random() * 80 + 10;
+                    this.speed = Math.random() * 6 + 4;
+                    this.size = Math.random() * 1 + 0.1;
+                    this.angle = Math.PI / 4; // 45 degrees
+                }
+
+                update() {
+                    this.x -= this.speed * Math.cos(this.angle);
+                    this.y += this.speed * Math.sin(this.angle);
+
+                    if (this.x < -100 || this.y > height + 100) {
+                        this.reset();
+                    }
+                }
+
+                draw() {
+                    ctx.save();
+                    ctx.translate(this.x, this.y);
+                    ctx.rotate(-this.angle); // Rotate to match direction (top-right to bottom-left)
+
+                    const gradient = ctx.createLinearGradient(0, 0, this.len, 0);
+                    gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+                    gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
+                    ctx.fillStyle = gradient;
+                    ctx.beginPath();
+                    // Draw a tapered line (meteor shape)
+                    ctx.moveTo(0, 0);
+                    ctx.lineTo(this.len, 0);
+                    ctx.lineTo(this.len, this.size);
+                    ctx.lineTo(0, this.size);
+                    ctx.closePath();
+                    ctx.fill();
+
+                    ctx.restore();
+                }
+            }
+
+            // Create initial meteors
+            for (let i = 0; i < 15; i++) {
+                meteors.push(new Meteor());
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, width, height);
+
+                // Draw Stars
+                ctx.fillStyle = 'white';
+                stars.forEach(star => {
+                    ctx.globalAlpha = star.opacity;
+                    ctx.beginPath();
+                    ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+                ctx.globalAlpha = 1;
+
+                // Draw Meteors
+                meteors.forEach(meteor => {
+                    meteor.update();
+                    meteor.draw();
+                });
+
+                requestAnimationFrame(animate);
+            }
+
+            window.addEventListener('resize', resize);
+            resize();
+            animate();
+        }
+    </script>
+</body>
+
+</html>
