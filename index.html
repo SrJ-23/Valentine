@@ -139,6 +139,10 @@
             <div class="emoji">🎉😝✨</div>
             <h1 class="mensaje-final">¡Gracias!<br>Tu solo trae tu fierro también 😎</h1>
         </div>
+
+        <audio id="bgMusic" loop style="display: none;">
+            <source src="music.mp3" type="audio/mpeg">
+        </audio>
     </div>
 
     <script>
@@ -217,7 +221,31 @@
         window.addEventListener('load', function () {
             moverBotonNo();
             initMeteorShower();
+            startMusic();
         });
+
+        function startMusic() {
+            const audio = document.getElementById('bgMusic');
+            audio.volume = 0.5;
+
+            // Intentar reproducir automáticamente
+            const playPromise = audio.play();
+
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.log("Autoplay blocked. Waiting for interaction.");
+                    // Si el navegador bloquea el autoplay, esperar a que el usuario interactúe
+                    document.body.addEventListener('click', function playOnInteraction() {
+                        audio.play();
+                        document.body.removeEventListener('click', playOnInteraction);
+                    });
+                    document.body.addEventListener('touchstart', function playOnInteraction() {
+                        audio.play();
+                        document.body.removeEventListener('touchstart', playOnInteraction);
+                    });
+                });
+            }
+        }
 
         // Meteor Shower Animation
         function initMeteorShower() {
